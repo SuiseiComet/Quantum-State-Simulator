@@ -15,7 +15,7 @@ const strokeColor = {
     g: 90,
     b: 190,
     a: 1,
-    rainbow: true
+    rainbow: false
 }
 
 const background = {
