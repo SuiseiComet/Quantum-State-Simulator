@@ -103,7 +103,7 @@ function draw_labels(){
     c.save();
     c.translate(left_boundary - 25, simulation.well_base_height / 2);
     c.rotate(-Math.PI/2);
-    c.fillText("Probability",0,0);
+    c.fillText("Probability (|ψ|\u00B2)",0,0);
 
     c.restore();
 }
