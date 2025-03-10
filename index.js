@@ -1,5 +1,7 @@
 const canvas = document.querySelector('canvas')
-const gui = new dat.GUI()
+const gui = new dat.GUI( )
+gui.domElement.id = 'gui';
+
 const c = canvas.getContext('2d')
 canvas.width = innerWidth - 10
 canvas.height = innerHeight - 10
@@ -62,7 +64,7 @@ sim_n_cont = simulationFolder.add(simulation, 'n', 1, 20).step(1).name('Energy L
 sim_m_cont = simulationFolder.add(simulation, 'm', 2, 21).step(1).name('Energy Level (m)')
 sim_n_prop_cont = simulationFolder.add(simulation, 'n_proportion', 0, 1).step(0.01).name('n proportion')
 sim_m_prop_cont = simulationFolder.add(simulation, 'm_proportion', 0, 1).step(0.01).name('m proportion')
-simulationFolder.add(simulation, 'well_width', 1, canvas.width).name('Well Width')
+simulationFolder.add(simulation, 'well_width', 1, canvas.width-200).name('Well Width')
 simulationFolder.add(simulation, 'well_base_height', 220, canvas.height-70).name('Well Base Height')
 
 
