@@ -14,17 +14,13 @@ hue = 0
 any_combination = false
 
 const strokeColor = {
-    r: 28,
-    g: 90,
-    b: 190,
+    color: [28, 90, 190],
     a: 1,
     rainbow: false
 }
 
 const background = {
-    r: 0,
-    g: 0,
-    b: 0,
+    color: [0, 0, 0],
     a: 1,
     horizontal_lines: 5,
     tick_marks: 4
@@ -44,17 +40,13 @@ const simulation = {
 }
 
 const backgroundFolder = gui.addFolder('Background and Grid')
-backgroundFolder.add(background, 'r', 0, 255).name('Red')
-backgroundFolder.add(background, 'g', 0, 255).name('Green')
-backgroundFolder.add(background, 'b', 0, 255).name('Blue')
-backgroundFolder.add(background, 'a', 0, 1).name('Opacity')
+backgroundFolder.addColor(background, "color").name("Background Color")
+backgroundFolder.add(background, 'a', 0.1, 1).step(0.01).name('Opacity')
 backgroundFolder.add(background, 'horizontal_lines', 0, 10).step(1).name('Horizontal Lines')
 backgroundFolder.add(background, 'tick_marks', 0, 10).step(1).name('X-axis ticks')
 
 const strokeFolder = gui.addFolder('Wave Color')
-strokeFolder.add(strokeColor, 'r', 0, 255).name('Red')
-strokeFolder.add(strokeColor, 'g', 0, 255).name('Green')
-strokeFolder.add(strokeColor, 'b', 0, 255).name('Blue')
+strokeFolder.addColor(strokeColor, "color").name("Wave Color")
 strokeFolder.add(strokeColor, 'a', 0, 1).name('Opacity')
 strokeFolder.add(strokeColor, 'rainbow', true, false).name('Rainbow')
 
@@ -65,7 +57,10 @@ sim_m_cont = simulationFolder.add(simulation, 'm', 2, 21).step(1).name('Energy L
 sim_n_prop_cont = simulationFolder.add(simulation, 'n_proportion', 0, 1).step(0.01).name('n proportion')
 sim_m_prop_cont = simulationFolder.add(simulation, 'm_proportion', 0, 1).step(0.01).name('m proportion')
 simulationFolder.add(simulation, 'well_width', 1, canvas.width-200).name('Well Width')
-simulationFolder.add(simulation, 'well_base_height', 220, canvas.height-70).name('Well Base Height')
+
+
+
+
 
 
 function input(){
@@ -125,7 +120,6 @@ function draw_tick_marks(){
     }
 
     c.lineWidth = 1.0;
-
 }
 
 function draw_labels(){
@@ -139,7 +133,7 @@ function draw_labels(){
     c.save();
     c.translate(left_boundary - 25, simulation.well_base_height / 2);
     c.rotate(-Math.PI/2);
-    c.fillText("Probability |ψ|\u00B2",0,0);
+    c.fillText("Probability Density |ψ|\u00B2",0,0);
 
     c.restore();
 }
@@ -168,10 +162,10 @@ function update() {
     left_boundary = (canvas.width - simulation.well_width) / 2.0
     right_boundary = left_boundary + simulation.well_width
 
-    c.fillStyle = `rgba(${background.r},${background.g},${background.b},${background.a})`
+    c.fillStyle = `rgba(${background.color[0]},${background.color[1]},${background.color[2]},${background.a})`
     c.fillRect(0, 0, canvas.width, canvas.height)
     draw_grid_horizontal()
-    c.strokeStyle = `rgba(${strokeColor.r},${strokeColor.g},${strokeColor.b},${strokeColor.a})`
+    c.strokeStyle = `rgba(${strokeColor.color[0]},${strokeColor.color[1]},${strokeColor.color[2]},${strokeColor.a})`
 
     for (let i = 0; i < points; i++) {
 
