@@ -3,8 +3,8 @@ const gui = new dat.GUI( {width : 300} )
 gui.domElement.id = 'gui';
 
 const c = canvas.getContext('2d')
-canvas.width = innerWidth 
-canvas.height = innerHeight
+canvas.width = window.innerWidth
+canvas.height = window.innerHeight - 5
 const MILLISECONDS_IN_SECOND = 1000
 const ANIMATION_SPEED_SCALE = 0.00000000000001
 g_previous_ticks = 0
