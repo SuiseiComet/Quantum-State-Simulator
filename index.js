@@ -1,10 +1,10 @@
 const canvas = document.querySelector('canvas')
-const gui = new dat.GUI( )
+const gui = new dat.GUI( {width : 300} )
 gui.domElement.id = 'gui';
 
 const c = canvas.getContext('2d')
-canvas.width = innerWidth - 10
-canvas.height = innerHeight - 10
+canvas.width = innerWidth 
+canvas.height = innerHeight
 const MILLISECONDS_IN_SECOND = 1000
 const ANIMATION_SPEED_SCALE = 0.00000000000001
 g_previous_ticks = 0
@@ -13,10 +13,12 @@ points = 4500
 hue = 0
 any_combination = false
 
-const strokeColor = {
+const WaveColor = {
     color: [28, 90, 190],
     a: 1,
-    rainbow: false
+    thickness: 5,
+    rainbow: false,
+    filled: true
 }
 
 const background = {
@@ -40,18 +42,20 @@ const simulation = {
 }
 
 const backgroundFolder = gui.addFolder('Background and Grid')
-backgroundFolder.addColor(background, "color").name("Background Color")
+backgroundFolder.addColor(background, "color").name("BackGround Color")
 backgroundFolder.add(background, 'a', 0.1, 1).step(0.01).name('Opacity')
 backgroundFolder.add(background, 'horizontal_lines', 0, 10).step(1).name('Horizontal Lines')
 backgroundFolder.add(background, 'tick_marks', 0, 10).step(1).name('X-axis ticks')
 
-const strokeFolder = gui.addFolder('Wave Color')
-strokeFolder.addColor(strokeColor, "color").name("Wave Color")
-strokeFolder.add(strokeColor, 'a', 0, 1).name('Opacity')
-strokeFolder.add(strokeColor, 'rainbow', true, false).name('Rainbow')
+const WaveFolder = gui.addFolder('Wave Color')
+WaveFolder.addColor(WaveColor, "color").name("Wave Color")
+WaveFolder.add(WaveColor, 'a', 0, 1).name('Opacity')
+WaveFolder.add(WaveColor, 'thickness', 1, 10).name('Wave Thickness')
+WaveFolder.add(WaveColor, 'filled', true, false).name('Filled Wave')
+WaveFolder.add(WaveColor, 'rainbow', true, false).name('Rainbow Filled Wave')
 
 const simulationFolder = gui.addFolder('Simulation Settings')
-simulationFolder.add(simulation, 'speed', 1, 2000).name('Simulation Speed')
+simulationFolder.add(simulation, 'speed', 1, 1000).name('Simulation Speed')
 sim_n_cont = simulationFolder.add(simulation, 'n', 1, 20).step(1).name('Energy Level (n)')
 sim_m_cont = simulationFolder.add(simulation, 'm', 2, 21).step(1).name('Energy Level (m)')
 sim_n_prop_cont = simulationFolder.add(simulation, 'n_proportion', 0, 1).step(0.01).name('n proportion')
@@ -59,8 +63,12 @@ sim_m_prop_cont = simulationFolder.add(simulation, 'm_proportion', 0, 1).step(0.
 simulationFolder.add(simulation, 'well_width', 1, canvas.width-200).name('Well Width')
 
 
-
-
+window.addEventListener('resize', function(event) {
+    canvas.width = innerWidth 
+    canvas.height = innerHeight
+    simulation.well_width = canvas.width * 7/10
+    simulation.well_base_height = well_base_height = canvas.height * (8.5/10)
+}, true);
 
 
 function input(){
@@ -80,9 +88,7 @@ function input(){
         simulation.n_sqrt_proportion = Math.sqrt(1 - newValue)
         sim_n_prop_cont.updateDisplay()
         sim_m_prop_cont.updateDisplay()
-    } )
-
-    }
+    })}
 }
 
 
@@ -104,6 +110,7 @@ function draw_grid_horizontal(){
 
 }
 
+
 function draw_tick_marks(){
     c.lineWidth = 2;
 
@@ -120,7 +127,9 @@ function draw_tick_marks(){
     }
 
     c.lineWidth = 1.0;
+
 }
+
 
 function draw_labels(){
     c.font = "30px Arial";
@@ -138,7 +147,8 @@ function draw_labels(){
     c.restore();
 }
 
-function draw_box(){
+
+function draw_well(){
     c.lineWidth = 4;
 
     c.beginPath()
@@ -152,6 +162,15 @@ function draw_box(){
     c.lineWidth = 1.0;
 }
 
+
+function drawFilledWave() {
+    c.beginPath()
+    c.moveTo(x, simulation.well_base_height)
+    c.lineTo(x, simulation.well_base_height - y)
+    c.stroke()
+}
+
+
 function update() {
     ticks = Date.now() / MILLISECONDS_IN_SECOND;
     delta_time = ticks - g_previous_ticks;
@@ -159,13 +178,21 @@ function update() {
 
     frame_count += g_previous_ticks * ANIMATION_SPEED_SCALE * simulation.speed
 
+    // Calculate left and right boundaries - Needed for drawing the grid
     left_boundary = (canvas.width - simulation.well_width) / 2.0
     right_boundary = left_boundary + simulation.well_width
 
+    // Set background color and draw background
     c.fillStyle = `rgba(${background.color[0]},${background.color[1]},${background.color[2]},${background.a})`
     c.fillRect(0, 0, canvas.width, canvas.height)
     draw_grid_horizontal()
-    c.strokeStyle = `rgba(${strokeColor.color[0]},${strokeColor.color[1]},${strokeColor.color[2]},${strokeColor.a})`
+
+    // Set Wavecolor and wave thickness
+    c.strokeStyle = `rgba(${WaveColor.color[0]},${WaveColor.color[1]},${WaveColor.color[2]},${WaveColor.a})`
+    c.lineWidth = WaveColor.thickness;
+
+    c.beginPath()
+    c.moveTo(left_boundary, simulation.well_base_height)
 
     for (let i = 0; i < points; i++) {
 
@@ -178,25 +205,30 @@ function update() {
               * Math.sin(i/points * simulation.m * Math.PI)
               * Math.cos((simulation.m**2 - simulation.n**2) * frame_count * Math.PI))
 
-        c.beginPath()
-        c.moveTo(x, simulation.well_base_height)
-        c.lineTo(x, simulation.well_base_height - y)
-        if (strokeColor.rainbow){
+        if (WaveColor.rainbow){
             hue = (y / simulation.wave_amplitude/1.8)*360 % 360
             c.strokeStyle = `hsl(${hue}, 100%, 50%)`
         }
 
-        c.stroke();
+        if (WaveColor.filled)
+            drawFilledWave()
+        else
+            c.lineTo(x, simulation.well_base_height - y)
     }
-    draw_box()
+
+    if (!WaveColor.filled){
+        c.stroke()
+    }
+    
+    draw_well()
     draw_labels()
     draw_tick_marks()
-  }
+}
+
 
 function animate() {
     requestAnimationFrame(animate)
     input()
     update()
 }
-
 animate()
