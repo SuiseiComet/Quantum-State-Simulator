@@ -1,1 +1,2 @@
-# getting-started-with-threejs
+# Quantum State Simulator
+# William Wei
